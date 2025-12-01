@@ -747,12 +747,14 @@ function jouerLettre(bBouton = false, bJoueur = false, sLettreCode = null) {
         }
     }    
 
-    setTimeout(changerVariable, nTemps, "bAccepteTouches", true);
-    setTimeout(changerVariable, nTemps, "bRejouerPermis", true);
-    setTimeout(changerVariable, nTemps, "bQuitterPermis", true);
-    setTimeout(changerVariable, nTemps, "bInputJoueur", false);
     if (sLettreCode == oVariablesJeu.oLettreActuelle.code) {
         setTimeout(lettreCorrecte, nTemps);
+    }
+    else {
+        setTimeout(changerVariable, nTemps, "bAccepteTouches", true);
+        setTimeout(changerVariable, nTemps, "bRejouerPermis", true);
+        setTimeout(changerVariable, nTemps, "bQuitterPermis", true);
+        setTimeout(changerVariable, nTemps, "bInputJoueur", false);
     }
 }
 
