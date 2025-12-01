@@ -13,7 +13,7 @@ oCanvas.height = window.innerHeight;
 
 // Chargement des images
 const oImgKitr = new Image();
-oImgKitr.src = "assets/images/kitr.webp";
+oImgKitr.src = "assets/images/kitr.png";
 const oImgLangues = new Image();
 oImgLangues.src = "https://s2.svgbox.net/octicons.svg?ic=globe-bold";
 const oImgRejouer = new Image();
