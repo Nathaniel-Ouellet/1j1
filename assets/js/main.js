@@ -21,9 +21,6 @@ oImgRejouer.src = "https://s2.svgbox.net/materialui.svg?ic=loop";
 const oImgQuitter = new Image();
 oImgQuitter.src = "https://s2.svgbox.net/octicons.svg?ic=x-bold";
 
-
-
-
 // Chargement des sons
 const oAudBipCourt = new Audio();
 oAudBipCourt.src = "assets/audio/bip-court.wav";
@@ -47,7 +44,6 @@ oAudSonTexte06.src = "assets/audio/son-texte-06.wav";
 let aAudSonsTexte = [oAudSonTexte01, oAudSonTexte02, oAudSonTexte03, oAudSonTexte04, oAudSonTexte05, oAudSonTexte06];
 
 
-//-------------------------------------------------------//
 // Quelques variables globales
 
 // Raccourci pour obtenir la taille du canvas plus rapidement, on vas en avoir besoin souvent !
@@ -244,14 +240,89 @@ let oTextes = {
     },
 };
 let langue = "fr";
-//-------------------------------------------------------//
 
+/* ---------------------------------------------------------- */
+/* ------------------    ÉVENEMENTS     --------------------- */
+/* ---------------------------------------------------------- */
 
 // Gestion des évenements
 window.addEventListener("load", init);
 document.addEventListener("keydown", clavierPhysique);
 oCanvas.addEventListener("click", sourisClic);
 oCanvas.addEventListener("mousemove", sourisMovement);
+
+/**
+ * Enregistre la position de la souris
+ * @param {*} evt Évènement de souris
+ */
+function sourisMovement(evt) {
+    oSouris = evt;
+}
+
+/**
+ * Réagit aux clics du joueur
+ * @param {*} evt Évènement de souris
+ */
+function sourisClic(evt) {
+    // Faux-bouton de la boîte de dialogue de KITR
+    if (evt.offsetX >= (pourcentageCanvas(0.5)) - 350 && evt.offsetX <= (pourcentageCanvas(0.5)) + 350 && evt.offsetY >= 25 && evt.offsetY <= 225) {
+        clavierPhysique({ key: " " });
+        return; // Skip tout les autres boutons.
+    }
+
+    let oBouton = {};
+    for (let i = 0; i < aBoutons.length; i++) {
+        oBouton = aBoutons[i];
+        if (evt.offsetX >= oBouton.nX && evt.offsetX <= oBouton.nX + oBouton.nLargeur && evt.offsetY >= oBouton.nY && evt.offsetY <= oBouton.nY + oBouton.nHauteur && oBouton.bActive) {
+            if (oBouton.sSousTitre.toLocaleLowerCase() == oTextes[langue].sJeuBoutonQuitter.toLocaleLowerCase() && !oVariablesJeu.bQuitterPermis) {
+                continue;
+            }
+            if (oBouton.sSousTitre.toLocaleLowerCase() != "quittermenu" && oVariablesJeu.bQuitter) {
+                continue;
+            }
+            oBouton.mAction(oBouton.parametre, oBouton.parametre2);
+            if (oBouton.bUsageUnique) {
+                aBoutons.splice(i, 1); // Si le bouton est à usage unique, aller dans l'array à la position du bouton (i) et supprimer x (1) pour supprimer ce bouton.
+            }
+            return; // Skip tout les autres boutons après avoir appuyé sur un bouton.
+        }
+    }
+}
+
+/**
+ * Réagit aux touches du clavier
+ * @param {*} evt Évènement de clavier
+ */
+function clavierPhysique(evt) {
+    if (oVariablesJeu.sEtatJeu != "MenuPrincipal" && !oVariablesJeu.bQuitter && !evt.repeat) {
+        switch (evt.key.toLowerCase()) {
+            case " ": case "enter":
+                if (!oVariablesJeu.bKitrActive) {
+                    break;
+                }
+                oKitr.nKitrEtapePosition++;
+                if (oKitr.nKitrEtapePosition < oKitr.aKitrPositions.length) {
+                    changerDestinationKitr(oKitr.aKitrPositions[oKitr.nKitrEtapePosition].nX, oKitr.aKitrPositions[oKitr.nKitrEtapePosition].nY, oKitr.aKitrPositions[oKitr.nKitrEtapePosition].nVitesse, oKitr.aKitrPositions[oKitr.nKitrEtapePosition].aDialogue, oKitr.aKitrPositions[oKitr.nKitrEtapePosition].mAction, oKitr.aKitrPositions[oKitr.nKitrEtapePosition].parametre, oKitr.aKitrPositions[oKitr.nKitrEtapePosition].parametre2, oKitr.aKitrPositions[oKitr.nKitrEtapePosition].parametre3);
+                } else {
+                    // oKitr.nKitrBougerTimer = oKitr.nKitrTempsBoucles - 1;
+                    console.log("Fin de la liste de positions de KITR!");
+                    oKitr.nKitrEtapePosition--; // On reviens à la dernière position pour pouvoir passer à la prochaine position correctement si il y en a plus de rajouté plus tard.
+                }
+                break;
+
+            case "a": case "b": case "c": case "d": case "e": case "f": case "g": case "h": case "i": case "j": case "k": case "l": case "m": case "n": case "o": case "p": case "q": case "r": case "s": case "t": case "u": case "v": case "w": case "x": case "y": case "z": // Toutes les lettres de l'alphabet
+                lettreEntree(evt.key.toLowerCase());
+                break;
+
+            default:
+                break;
+        }
+    }
+}
+
+/* ---------------------------------------------------------- */
+/* ------------------     FONCTIONS     --------------------- */
+/* ---------------------------------------------------------- */
 
 /**
  * Initialisation de l'état de base
@@ -745,7 +816,7 @@ function jouerLettre(bBouton = false, bJoueur = false, sLettreCode = null) {
                 nTemps += 400;
             }
         }
-    }    
+    }
 
     if (sLettreCode == oVariablesJeu.oLettreActuelle.code) {
         setTimeout(lettreCorrecte, nTemps);
@@ -1155,69 +1226,6 @@ function afficherIndicateur() {
         oCtx.closePath();
     }
     oCtx.restore(); // Recharge la sauvegarde au début de la fonction
-}
-
-/**
- * Réagit aux touches du clavier
- * @param {*} evt Évènement de clavier
- */
-function clavierPhysique(evt) {
-    if (oVariablesJeu.sEtatJeu != "MenuPrincipal" && !oVariablesJeu.bQuitter && !evt.repeat) {
-        switch (evt.key.toLowerCase()) {
-            case " ": case "enter":
-                if (!oVariablesJeu.bKitrActive) {
-                    break;
-                }
-                oKitr.nKitrEtapePosition++;
-                if (oKitr.nKitrEtapePosition < oKitr.aKitrPositions.length) {
-                    changerDestinationKitr(oKitr.aKitrPositions[oKitr.nKitrEtapePosition].nX, oKitr.aKitrPositions[oKitr.nKitrEtapePosition].nY, oKitr.aKitrPositions[oKitr.nKitrEtapePosition].nVitesse, oKitr.aKitrPositions[oKitr.nKitrEtapePosition].aDialogue, oKitr.aKitrPositions[oKitr.nKitrEtapePosition].mAction, oKitr.aKitrPositions[oKitr.nKitrEtapePosition].parametre, oKitr.aKitrPositions[oKitr.nKitrEtapePosition].parametre2, oKitr.aKitrPositions[oKitr.nKitrEtapePosition].parametre3);
-                } else {
-                    // oKitr.nKitrBougerTimer = oKitr.nKitrTempsBoucles - 1;
-                    console.log("Fin de la liste de positions de KITR!");
-                    oKitr.nKitrEtapePosition--; // On reviens à la dernière position pour pouvoir passer à la prochaine position correctement si il y en a plus de rajouté plus tard.
-                }
-                break;
-
-            case "a": case "b": case "c": case "d": case "e": case "f": case "g": case "h": case "i": case "j": case "k": case "l": case "m": case "n": case "o": case "p": case "q": case "r": case "s": case "t": case "u": case "v": case "w": case "x": case "y": case "z": // Toutes les lettres de l'alphabet
-                lettreEntree(evt.key.toLowerCase());
-                break;
-
-            default:
-                break;
-        }
-    }
-}
-
-/**
- * Enregistre la position de la souris
- * @param {*} evt Évènement de souris
- */
-function sourisMovement(evt) {
-    oSouris = evt;
-}
-
-/**
- * Réagit aux clics du joueur
- * @param {*} evt Évènement de souris
- */
-function sourisClic(evt) {
-    let oBouton = {};
-    for (let i = 0; i < aBoutons.length; i++) {
-        oBouton = aBoutons[i];
-        if (evt.offsetX >= oBouton.nX && evt.offsetX <= oBouton.nX + oBouton.nLargeur && evt.offsetY >= oBouton.nY && evt.offsetY <= oBouton.nY + oBouton.nHauteur && oBouton.bActive) {
-            if (oBouton.sSousTitre.toLocaleLowerCase() == oTextes[langue].sJeuBoutonQuitter.toLocaleLowerCase() && !oVariablesJeu.bQuitterPermis) {
-                continue;
-            }
-            if (oBouton.sSousTitre.toLocaleLowerCase() != "quittermenu" && oVariablesJeu.bQuitter) {
-                continue;
-            }
-            oBouton.mAction(oBouton.parametre, oBouton.parametre2);
-            if (oBouton.bUsageUnique) {
-                aBoutons.splice(i, 1); // Si le bouton est à usage unique, aller dans l'array à la position du bouton (i) et supprimer x (1) pour supprimer ce bouton.
-            }
-            return; // Skip tout les autres boutons après avoir appuyé sur un bouton.
-        }
-    }
 }
 
 /**
