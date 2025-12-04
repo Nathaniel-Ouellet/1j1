@@ -825,8 +825,8 @@ function jouerLettre(bBouton = false, bJoueur = false, sLettreCode = null) {
         setTimeout(changerVariable, nTemps, "bAccepteTouches", true);
         setTimeout(changerVariable, nTemps, "bRejouerPermis", true);
         setTimeout(changerVariable, nTemps, "bQuitterPermis", true);
-        setTimeout(changerVariable, nTemps, "bInputJoueur", false);
     }
+    setTimeout(changerVariable, nTemps, "bInputJoueur", false);
 }
 
 /**
